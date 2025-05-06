@@ -31,7 +31,7 @@ class AVLNode(object):
 	@returns: False if self is a virtual node, True otherwise.
 	"""
 	def is_real_node(self):
-		return False
+		return self.key is not None
 
 
 
@@ -57,6 +57,14 @@ class AVLTree(object):
 	@returns: node corresponding to key
 	"""
 	def search(self, key):
+		node = self.root
+		while node != None:
+			if key == node.key:
+				return node.val # found!
+			elif key < node.key:
+				node = node.left
+			else:
+				node = node.right
 		return None
 
 
@@ -72,7 +80,30 @@ class AVLTree(object):
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
 	def insert(self, key, val, start="root"):
-		return -1
+		parent = None # this will be the parent of the new node
+		node = self.root
+
+		while node != None: # keep descending the tree
+			#if key == node.key:
+			#	node.val = val     # update the val for this key
+			#	return
+			
+			parent = node
+			if key < node.key:
+				node = node.left
+			else:
+				node = node.right
+			
+		if parent == None: # was empty tree, need to update root
+			self.root = AVLNode(key, val)
+		elif key < parent.key: 
+			parent.left = AVLNode(key, val) # "hang" new node as left child
+		else:  
+			parent.right = AVLNode(key, val) # "hang"    ...     right child
+		
+		self.size += 1
+		#return None
+		return -1 # need to return number of rotations
 
 
 	"""deletes node from the dictionary
@@ -92,9 +123,19 @@ class AVLTree(object):
 	@returns: a sorted list according to key of touples (key, value) representing the data structure
 	"""
 	def avl_to_array(self):
-		return None
+		result = []
 
-
+		def inorder(node):
+			if node is None or not node.is_real_node():
+				return
+			inorder(node.left)
+			result.append((node.key, node.value))
+			inorder(node.right)
+		
+		inorder(self.root)
+		return result
+		
+	
 	"""returns the number of items in dictionary 
 
 	@rtype: int
@@ -110,10 +151,10 @@ class AVLTree(object):
 	@returns: the root, None if the dictionary is empty
 	"""
 	def get_root(self):
-		return None
+		return self.root
 
 
-    """gets amir's suggestion of balance factor
+	"""gets amir's suggestion of balance factor
 
 	@returns: the number of nodes which have balance factor equals to 0 devided by the total number of nodes
 	"""
