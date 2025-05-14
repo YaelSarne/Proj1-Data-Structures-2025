@@ -9,7 +9,6 @@ class Tree_node:
     def __repr__(self):
         return "(" + str(self.key) + ":" + str(self.val) + ")"
 
-
     
 class Binary_search_tree:
 
@@ -139,6 +138,9 @@ def test():
     print("MIN ",t.minimum())
     print("DEPTH ",t.depth())
     
+
+
+
 
 
 

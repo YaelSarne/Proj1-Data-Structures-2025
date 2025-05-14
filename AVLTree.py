@@ -23,7 +23,12 @@ class AVLNode(object):
 		self.right = None
 		self.parent = None
 		self.height = -1
+	
+	def __repr__(self):
+		return "(" + str(self.key) + ":" + str(self.val) + ")"
+
 		
+
 
 	"""returns whether self is not a virtual node 
 
@@ -47,6 +52,57 @@ class AVLTree(object):
 	"""
 	def __init__(self):
 		self.root = None
+
+	
+	def __repr__(self):  # you don't need to understand the implementation of this method
+		def printree(root):
+			if not root:
+				return ["#"]
+
+			root_key = str(root.key)
+			left, right = printree(root.left), printree(root.right)
+
+			lwid = len(left[-1])
+			rwid = len(right[-1])
+			rootwid = len(root_key)
+			result = [(lwid + 1) * " " + root_key + (rwid + 1) * " "]
+			
+			ls = len(left[0].rstrip())
+            
+			rs = len(right[0]) - len(right[0].lstrip())
+			result.append(ls * " " + (lwid - ls) * "_" + "/" + rootwid * " " + "\\" + rs * "_" + (rwid - rs) * " ")
+			
+			for i in range(max(len(left), len(right))):
+				row = ""
+				if i < len(left):
+					row += left[i]
+				else:
+					row += lwid * " "
+				row += (rootwid + 2) * " "
+
+				if i < len(right):
+					row += right[i]
+				else:
+					row += rwid * " "
+				result.append(row)
+			return result
+
+		return '\n'.join(printree(self.root))
+
+
+
+	def right_rotation(self, B):
+		A = B.left
+		B.left = A.right
+		B.left.parent = B
+		A.right = B
+		A.parent = B.parent
+		if A.parent == None:
+			self.root = A
+		else:
+			A.parent.right = A # check if root
+		B.parent = A
+
 
 
 	"""searches for a node in the dictionary corresponding to the key
@@ -101,7 +157,7 @@ class AVLTree(object):
 		else:  
 			parent.right = AVLNode(key, val) # "hang"    ...     right child
 		
-		self.size += 1
+		#self.size += 1
 		#return None
 		return -1 # need to return number of rotations
 
