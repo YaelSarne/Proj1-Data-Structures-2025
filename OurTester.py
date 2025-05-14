@@ -5,16 +5,13 @@ from AVLTree import AVLNode, AVLTree
 def main():
     
     tree = AVLTree()
-    tree.insert(10, "ten")
-    tree.insert(5, "five")
-    tree.insert(20, "twenty")
-    tree.insert(30, "30")
+    tree.insert(2, "ten")
+    tree.insert(3, "five")
     tree.insert(7, "7")
-    tree.insert(3, "3")
-    tree.insert(2, "2")
-    print(repr(tree))
-    tree.right_rotation(tree.root)
-    print(repr(tree))
+    print(tree)
+    print("**********AFTER************")
+    print()
+    print(tree)
 
 
     def test_insert_and_search(self):

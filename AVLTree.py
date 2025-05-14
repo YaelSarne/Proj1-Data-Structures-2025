@@ -23,13 +23,12 @@ class AVLNode(object):
 		self.right = None
 		self.parent = None
 		self.height = -1
+		self.BF = 0 #not sure about this
 	
 	def __repr__(self):
 		return "(" + str(self.key) + ":" + str(self.val) + ")"
 
 		
-
-
 	"""returns whether self is not a virtual node 
 
 	@rtype: bool
@@ -94,14 +93,36 @@ class AVLTree(object):
 	def right_rotation(self, B):
 		A = B.left
 		B.left = A.right
-		B.left.parent = B
+		if A.right != None:
+			B.left.parent = B
 		A.right = B
 		A.parent = B.parent
 		if A.parent == None:
 			self.root = A
-		else:
+		elif B.parent.right == B:
 			A.parent.right = A # check if root
+		else:
+			A.parent.left = A
 		B.parent = A
+
+
+	#B has to have a B.right.left son
+	def left_rotation(self, B):
+		A = B.right
+		B.right = A.left
+		if A.left != None:
+			B.right.parent = B
+		A.left = B
+		A.parent = B.parent
+		if A.parent == None:
+			self.root = A
+		elif B.parent.right == B:
+			A.parent.right = A # check if root
+		else:
+			A.parent.left = A
+		B.parent = A
+
+
 
 
 
@@ -140,22 +161,65 @@ class AVLTree(object):
 		node = self.root
 
 		while node != None: # keep descending the tree
-			#if key == node.key:
-			#	node.val = val     # update the val for this key
-			#	return
+			if key == node.key:
+				node.val = val     # update the val for this key
+				break
 			
 			parent = node
 			if key < node.key:
 				node = node.left
 			else:
 				node = node.right
-			
+
+		height_changed = False
+
 		if parent == None: # was empty tree, need to update root
 			self.root = AVLNode(key, val)
+			parent = self.root
+			parent.height += 1
+			height_changed = True
+
 		elif key < parent.key: 
 			parent.left = AVLNode(key, val) # "hang" new node as left child
+			if parent.right is None:
+				parent.height += 1
+				height_changed = True
 		else:  
 			parent.right = AVLNode(key, val) # "hang"    ...     right child
+			if parent.left is None:
+				parent.height += 1
+				height_changed = True
+		
+		left_son_height = -1 if parent.left is None else parent.left.height
+		right_son_height = -1 if parent.right is None else parent.right.height
+		parent.BF = left_son_height - right_son_height
+
+		while parent != None:
+			abs_BF = abs(parent.BF) 
+			if abs_BF < 2 and not height_changed:
+				return 0 # IS THIS REALLY WHAT WE NEED TO RETURN? NO GILGULIM
+			elif abs_BF < 2 and height_changed:
+				parent = parent.parent
+			else:
+				#GILGULIM!!!!!!
+				if parent.BF == -2:
+					if parent.right.BF == -1:
+						self.left_rotation(parent)
+
+					elif parent.right.BF == 1:
+						self.right_rotation(parent.right) #first we do a right rotation on the right son
+						self.left_rotation(parent)
+
+				elif parent.BF == 2:
+					if parent.left.BF == 1:
+						self.right_rotation(parent)
+
+					elif parent.left.BF == -1:
+						self.left_rotation(parent.left) 
+						self.right_rotation(parent)
+					
+				parent = parent.parent
+
 		
 		#self.size += 1
 		#return None
