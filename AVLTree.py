@@ -51,6 +51,7 @@ class AVLTree(object):
 	"""
 	def __init__(self):
 		self.root = None
+		self.size = 0 
 
 	
 	def __repr__(self):  # you don't need to understand the implementation of this method
@@ -168,7 +169,7 @@ class AVLTree(object):
 		parent = None # this will be the parent of the new node
 		node = self.root
 
-		# Search place for insert
+		# Find place for insert
 		while node != None: # keep descending the tree
 			if key == node.key:
 				node.val = val     # update the val for this key
@@ -202,9 +203,14 @@ class AVLTree(object):
 			if parent.left is None:
 				parent.height += 1
 				height_changed = True
-		
-		rotation_cnt = 0
 
+		rotation_cnt = self.rebalance_upward(parent, height_changed)
+		
+		self.size += 1
+		return rotation_cnt # need to return number of rotations
+
+	def rebalance_upward(self, parent, height_changed):
+		rotation_cnt = 0
 		while parent != None:
 			print("parent is: ", parent.key)
 			old_height = parent.height
@@ -243,11 +249,7 @@ class AVLTree(object):
 
 				parent = parent.parent
 			height_changed = False
-
-		
-		#self.size += 1
-		#return None
-		return rotation_cnt # need to return number of rotations
+		return rotation_cnt
 
 
 	"""deletes node from the dictionary
@@ -258,8 +260,19 @@ class AVLTree(object):
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
 	def delete(self, node):
-		return -1
+		parent = node.parent
+		rotation_cnt = 0
 
+		#TO DO 
+		#Handle BST delete (with cases and sucssesor)
+		# Case 1 : node deleted is a leaf 
+		# Case 2 : node deleted has 1 child : connect parent and child 
+		# Case 3 : node deleted has 2 child : replace with sucssor
+		
+		# Rebalance from the parent upward
+		rotation_cnt += self.rebalance_upward(parent, True)
+		self.size += -1
+		return rotation_cnt
 
 	"""returns an array representing dictionary 
 

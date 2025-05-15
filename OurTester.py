@@ -22,6 +22,7 @@ def main():
     #tree.right_rotation(tree.root.right) #first we do a right rotation on the right son
     #tree.left_rotation(tree.root)
     print(tree)
+    test_insert_and_search()
 
 
     def test_insert_and_search(self):
