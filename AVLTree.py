@@ -190,18 +190,27 @@ class AVLTree(object):
 				parent.height += 1
 				height_changed = True
 		
-		left_son_height = -1 if parent.left is None else parent.left.height
-		right_son_height = -1 if parent.right is None else parent.right.height
-		parent.BF = left_son_height - right_son_height
+		# left_son_height = -1 if parent.left is None else parent.left.height
+		# right_son_height = -1 if parent.right is None else parent.right.height
+		# parent.BF = left_son_height - right_son_height
 		rotation_cnt = 0
 
 		while parent != None:
+			left_son_height = -1 if parent.left is None else parent.left.height
+			right_son_height = -1 if parent.right is None else parent.right.height
+			parent.BF = left_son_height - right_son_height
+			old_height = parent.height
+			parent.height = 1 + max(right_son_height, left_son_height)
+
+			if old_height != parent.height:
+				height_changed = True
+
 			abs_BF = abs(parent.BF) 
 			if abs_BF < 2 and not height_changed:
 				return 0 # IS THIS REALLY WHAT WE NEED TO RETURN? NO GILGULIM
 			elif abs_BF < 2 and height_changed:
 				parent = parent.parent
-			else:
+			elif abs_BF == 2:
 				#GILGULIM!!!!!!
 				if parent.BF == -2:
 					if parent.right.BF == -1:
@@ -224,6 +233,7 @@ class AVLTree(object):
 						rotation_cnt += 2
 					
 				parent = parent.parent
+			height_changed = False
 
 		
 		#self.size += 1
