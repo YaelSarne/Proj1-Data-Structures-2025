@@ -106,7 +106,6 @@ class AVLTree(object):
 		B.parent = A
 
 
-	#B has to have a B.right.left son
 	def left_rotation(self, B):
 		A = B.right
 		B.right = A.left
@@ -176,15 +175,17 @@ class AVLTree(object):
 		if parent == None: # was empty tree, need to update root
 			self.root = AVLNode(key, val)
 			parent = self.root
-			height_changed = True
+			height_changed = True #when it doesn't exist it's -1, now it's 0
 
 		elif key < parent.key: 
 			parent.left = AVLNode(key, val) # "hang" new node as left child
+			parent.left.parent = parent #update the new node parents
 			if parent.right is None:
-				parent.height += 1
+				parent.height += 1 #PROBLEM: only changing the parent's height, never going back to root
 				height_changed = True
 		else:  
 			parent.right = AVLNode(key, val) # "hang"    ...     right child
+			parent.right.parent = parent
 			if parent.left is None:
 				parent.height += 1
 				height_changed = True
