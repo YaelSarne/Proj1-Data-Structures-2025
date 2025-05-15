@@ -5,15 +5,22 @@ from AVLTree import AVLNode, AVLTree
 def main():
     
     tree = AVLTree()
-    tree.insert(6, "ten")
-    tree.insert(8, "five")
-    tree.insert(7, "7")
-    print(tree)
-    print()
+    tree.insert(6, "six")
+    tree.insert(8, "eight")
+    tree.insert(7, "seven")
+    tree.insert(10, "ten")
+    tree.insert(5, "five")
+    tree.insert(9, "nine")
+    tree.insert(4, "four")
+    tree.insert(11, "eleven")
+    tree.insert(3, "three")
+    tree.insert(12, "twelve")
+    tree.insert(2, "two")
+    tree.insert(1, "one")
     print("**********AFTER************")
     print()
-    tree.right_rotation(tree.root.right) #first we do a right rotation on the right son
-    tree.left_rotation(tree.root)
+    #tree.right_rotation(tree.root.right) #first we do a right rotation on the right son
+    #tree.left_rotation(tree.root)
     print(tree)
 
 

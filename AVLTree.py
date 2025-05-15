@@ -89,6 +89,12 @@ class AVLTree(object):
 		return '\n'.join(printree(self.root))
 
 
+	def fix_node_attr(self, node):
+		"""Fix node height + BF"""
+		left_h = -1 if node.left is None else node.left.height
+		right_h = -1 if node.right is None else node.right.height
+		node.height = 1 + max(left_h, right_h)
+		node.BF = left_h - right_h
 
 	def right_rotation(self, B):
 		A = B.left
@@ -105,6 +111,9 @@ class AVLTree(object):
 			A.parent.left = A
 		B.parent = A
 
+		self.fix_node_attr(B)
+		self.fix_node_attr(A)
+
 
 	def left_rotation(self, B):
 		A = B.right
@@ -120,9 +129,9 @@ class AVLTree(object):
 		else:
 			A.parent.left = A
 		B.parent = A
-
-
-
+		
+		self.fix_node_attr(B)
+		self.fix_node_attr(A)
 
 
 	"""searches for a node in the dictionary corresponding to the key
@@ -159,6 +168,7 @@ class AVLTree(object):
 		parent = None # this will be the parent of the new node
 		node = self.root
 
+		# Search place for insert
 		while node != None: # keep descending the tree
 			if key == node.key:
 				node.val = val     # update the val for this key
@@ -170,6 +180,7 @@ class AVLTree(object):
 			else:
 				node = node.right
 
+		# fix AVL Tree
 		height_changed = False
 
 		if parent == None: # was empty tree, need to update root
@@ -178,29 +189,26 @@ class AVLTree(object):
 			height_changed = True #when it doesn't exist it's -1, now it's 0
 
 		elif key < parent.key: 
+			#print("curr key: ", key," insert under node: ",parent.key)
 			parent.left = AVLNode(key, val) # "hang" new node as left child
 			parent.left.parent = parent #update the new node parents
 			if parent.right is None:
 				parent.height += 1 #PROBLEM: only changing the parent's height, never going back to root
 				height_changed = True
-		else:  
+		else:
+			#print("curr key: ", key," insert under node: ",parent.key)
 			parent.right = AVLNode(key, val) # "hang"    ...     right child
 			parent.right.parent = parent
 			if parent.left is None:
 				parent.height += 1
 				height_changed = True
 		
-		# left_son_height = -1 if parent.left is None else parent.left.height
-		# right_son_height = -1 if parent.right is None else parent.right.height
-		# parent.BF = left_son_height - right_son_height
 		rotation_cnt = 0
 
 		while parent != None:
-			left_son_height = -1 if parent.left is None else parent.left.height
-			right_son_height = -1 if parent.right is None else parent.right.height
-			parent.BF = left_son_height - right_son_height
+			print("parent is: ", parent.key)
 			old_height = parent.height
-			parent.height = 1 + max(right_son_height, left_son_height)
+			self.fix_node_attr(parent)
 
 			if old_height != parent.height:
 				height_changed = True
@@ -211,6 +219,7 @@ class AVLTree(object):
 			elif abs_BF < 2 and height_changed:
 				parent = parent.parent
 			elif abs_BF == 2:
+				print("Gilgul! parent is ", parent.key)
 				#GILGULIM!!!!!!
 				if parent.BF == -2:
 					if parent.right.BF == -1:
@@ -227,11 +236,11 @@ class AVLTree(object):
 						self.right_rotation(parent)
 						rotation_cnt += 1
 
-					elif parent.left.BF == -1:
+					elif parent.left.BF == -1: #A
 						self.left_rotation(parent.left) 
 						self.right_rotation(parent)
 						rotation_cnt += 2
-					
+
 				parent = parent.parent
 			height_changed = False
 
