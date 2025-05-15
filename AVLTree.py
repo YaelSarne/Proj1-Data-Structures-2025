@@ -236,7 +236,7 @@ class AVLTree(object):
 						self.right_rotation(parent)
 						rotation_cnt += 1
 
-					elif parent.left.BF == -1: #A
+					elif parent.left.BF == -1: 
 						self.left_rotation(parent.left) 
 						self.right_rotation(parent)
 						rotation_cnt += 2
