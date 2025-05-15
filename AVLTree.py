@@ -22,7 +22,7 @@ class AVLNode(object):
 		self.left = None
 		self.right = None
 		self.parent = None
-		self.height = -1
+		self.height = 0
 		self.BF = 0 #not sure about this
 	
 	def __repr__(self):
@@ -176,7 +176,6 @@ class AVLTree(object):
 		if parent == None: # was empty tree, need to update root
 			self.root = AVLNode(key, val)
 			parent = self.root
-			parent.height += 1
 			height_changed = True
 
 		elif key < parent.key: 
@@ -193,6 +192,7 @@ class AVLTree(object):
 		left_son_height = -1 if parent.left is None else parent.left.height
 		right_son_height = -1 if parent.right is None else parent.right.height
 		parent.BF = left_son_height - right_son_height
+		rotation_cnt = 0
 
 		while parent != None:
 			abs_BF = abs(parent.BF) 
@@ -205,25 +205,29 @@ class AVLTree(object):
 				if parent.BF == -2:
 					if parent.right.BF == -1:
 						self.left_rotation(parent)
+						rotation_cnt += 1
 
 					elif parent.right.BF == 1:
 						self.right_rotation(parent.right) #first we do a right rotation on the right son
 						self.left_rotation(parent)
+						rotation_cnt += 2
 
 				elif parent.BF == 2:
 					if parent.left.BF == 1:
 						self.right_rotation(parent)
+						rotation_cnt += 1
 
 					elif parent.left.BF == -1:
 						self.left_rotation(parent.left) 
 						self.right_rotation(parent)
+						rotation_cnt += 2
 					
 				parent = parent.parent
 
 		
 		#self.size += 1
 		#return None
-		return -1 # need to return number of rotations
+		return rotation_cnt # need to return number of rotations
 
 
 	"""deletes node from the dictionary
