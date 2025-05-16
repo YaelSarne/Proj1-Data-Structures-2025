@@ -17,12 +17,25 @@ def main():
     tree.insert(12, "twelve")
     tree.insert(2, "two")
     tree.insert(1, "one")
+    print("here")
+    x = tree.search(6)
+    y = tree.successor(x)
+    print(y.key)
     print("**********AFTER************")
     print()
     #tree.right_rotation(tree.root.right) #first we do a right rotation on the right son
     #tree.left_rotation(tree.root)
     print(tree)
-    test_insert_and_search()
+
+
+    print("***DELETE****")
+    print()
+    x = tree.search(7)
+    tree.delete(x)
+    print(tree)
+    x = tree.search(10)
+    tree.delete(x)
+    print(tree)
 
 
     def test_insert_and_search(self):

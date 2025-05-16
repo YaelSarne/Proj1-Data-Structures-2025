@@ -146,7 +146,8 @@ class AVLTree(object):
 		node = self.root
 		while node != None:
 			if key == node.key:
-				return node.val # found!
+				#return node.value # found!
+				return node #need to change back (just for test)
 			elif key < node.key:
 				node = node.left
 			else:
@@ -252,6 +253,25 @@ class AVLTree(object):
 		return rotation_cnt
 
 
+	def Min(self, node):
+		"""Find Min value in sub tree of node"""
+		while node.left != None:
+			node = node.left
+		return node
+	
+	def successor(self, node):
+		"""Find successor of node"""
+		# node has right child
+		if node.right != None:
+			return self.Min(node.right)
+		
+		# successor is the lowest ancestor y of x Such that x is in its left tree
+		y = node.parent
+		while (y != None) and (node == y.right):
+			node = y
+			y = node.parent
+		return y
+
 	"""deletes node from the dictionary
 
 	@type node: AVLNode
@@ -259,16 +279,54 @@ class AVLTree(object):
 	@rtype: int
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
+
+	def remove_leaf(self, node):
+		# Case 1: node deleted is a leaf - Simply delete
+		parent = node.parent
+		if parent is None: # node is root
+			self.root = None
+		elif parent.left == node:
+			parent.left = None
+		else:
+			parent.right = None
+		return parent
+
+	def remove_single_child(self, node):
+		# Case 2: node deleted has only 1 child
+		parent = node.parent
+		child = node.left if node.left else node.right
+		child.parent = parent
+		if parent is None: #node is root
+			self.root = child
+		elif parent.left == node:
+			parent.left = child
+		else:
+			parent.right = child
+		return parent 
+	
 	def delete(self, node):
 		parent = node.parent
 		rotation_cnt = 0
 
-		#TO DO 
-		#Handle BST delete (with cases and sucssesor)
-		# Case 1 : node deleted is a leaf 
-		# Case 2 : node deleted has 1 child : connect parent and child 
-		# Case 3 : node deleted has 2 child : replace with sucssor
-		
+		# Case 1: node deleted is a leaf
+		if node.left is None and node.right is None:
+			parent = self.remove_leaf(node)
+		# Case 2: node deleted has only 1 child - bypass it (connect parent and child)
+		elif node.left is None or node.right is None:
+			parent = self.remove_single_child(node)
+
+		# Case 3: node deleted has 2 child : replace with sucssor
+		else:
+			# y = successor of the node
+			successor = self.successor(node) 
+			# replace x by y :
+			node.key, node.value = successor.key, successor.value
+			# delete the node y was physicly - y has no left child and it will be case 2 or 1
+			if successor.right:
+				parent = self.remove_single_child(successor)
+			else:
+				parent = self.remove_leaf(successor)
+
 		# Rebalance from the parent upward
 		rotation_cnt += self.rebalance_upward(parent, True)
 		self.size += -1
