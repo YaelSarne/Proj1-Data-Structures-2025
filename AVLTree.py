@@ -147,7 +147,7 @@ class AVLTree(object):
 		while node != None:
 			if key == node.key:
 				#return node.value # found!
-				return node #need to change back (just for test)
+				return node 
 			elif key < node.key:
 				node = node.left
 			else:
@@ -350,7 +350,6 @@ class AVLTree(object):
 		inorder(self.root)
 		return result
 		
-	
 	"""returns the number of items in dictionary 
 
 	@rtype: int

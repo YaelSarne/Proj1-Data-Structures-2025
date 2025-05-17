@@ -26,7 +26,8 @@ def main():
     #tree.right_rotation(tree.root.right) #first we do a right rotation on the right son
     #tree.left_rotation(tree.root)
     print(tree)
-
+    print(tree.avl_to_array())
+    print(tree.size)
 
     print("***DELETE****")
     print()
