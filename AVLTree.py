@@ -52,6 +52,7 @@ class AVLTree(object):
 	def __init__(self):
 		self.root = None
 		self._size = 0 
+		self.bf_zero_cnt = 0
 
 	
 	def __repr__(self):  # you don't need to understand the implementation of this method
@@ -166,12 +167,15 @@ class AVLTree(object):
 		parent = None # this will be the parent of the new node
 		node = self.root
 
+		if key == None: #*********************************************not sure about this
+			return 0
+
 		# Find place for insert
 		while node != None and node.is_real_node():
 			# keep descending the tree
 			if key == node.key:
 				node.value = val     # update the val for this key
-				break
+				return 0 #********************and this - can we have doubles in the tree?
 			
 			parent = node
 			if key < node.key:
@@ -186,6 +190,7 @@ class AVLTree(object):
 			self.root = AVLNode(key, val)
 			parent = self.root
 			height_changed = True #when it doesn't exist it's -1, now it's 0
+			self.bf_zero_cnt += 1
 
 		elif key < parent.key: 
 			parent.left = AVLNode(key, val) # "hang" new node as left child
@@ -193,12 +198,16 @@ class AVLTree(object):
 			if not parent.right.is_real_node():
 				parent.height += 1
 				height_changed = True
+			else:
+				self.bf_zero_cnt += 1
 		else:
 			parent.right = AVLNode(key, val) # "hang"    ...     right child
 			parent.right.parent = parent
 			if not parent.right.is_real_node():
 				parent.height += 1
 				height_changed = True
+			else:
+				self.bf_zero_cnt += 1
 
 		rotation_cnt = self.rebalance_upward(parent, height_changed)
 		
