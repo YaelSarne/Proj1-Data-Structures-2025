@@ -51,6 +51,7 @@ class AVLTree(object):
 	"""
 	def __init__(self):
 		self.root = None
+		self.max_node = None
 		self._size = 0 
 		self.bf_zero_cnt = 0
 
@@ -60,7 +61,7 @@ class AVLTree(object):
 			if not root:
 				return ["#"]
 
-			root_key = str(root.key)
+			root_key = str(root.key) +":" +  str(root.BF)
 			left, right = printree(root.left), printree(root.right)
 
 			lwid = len(left[-1])
@@ -93,10 +94,23 @@ class AVLTree(object):
 
 	def fix_node_attr(self, node): 
 		"""Fix node height + BF"""
+		old_bf = node.BF
 		left_h = node.left.height
 		right_h = node.right.height
 		node.height = 1 + max(left_h, right_h)
 		node.BF = left_h - right_h
+		print("key now: ", node.key)
+		print("old bf ", old_bf)
+		print("new bf ", node.BF)
+		if old_bf != node.BF and abs(old_bf) < 2 and abs(node.BF) < 2:
+			print("key changed: ", node.key)
+			
+			if old_bf == 0:
+				self.bf_zero_cnt -= 1
+			else:
+				self.bf_zero_cnt += 1
+			
+		
 
 	def right_rotation(self, B):
 		A = B.left
@@ -165,9 +179,23 @@ class AVLTree(object):
 	"""
 	def insert(self, key, val, start="root"):
 		parent = None # this will be the parent of the new node
-		node = self.root
 
 		if key == None: #*********************************************not sure about this
+			return 0
+		
+		if start == "max":
+			node = self.max_node
+
+			# go upwards
+			while node != None and key < node.key:
+				if node.parent is None:
+					break
+				node = node.parent
+
+		elif start == "root":
+			node = self.root
+		
+		else:
 			return 0
 
 		# Find place for insert
@@ -188,9 +216,10 @@ class AVLTree(object):
 
 		if parent == None: # was empty tree, need to update root
 			self.root = AVLNode(key, val)
+			self.max_node = self.root
 			parent = self.root
 			height_changed = True #when it doesn't exist it's -1, now it's 0
-			self.bf_zero_cnt += 1
+			# self.bf_zero_cnt += 1
 
 		elif key < parent.key: 
 			parent.left = AVLNode(key, val) # "hang" new node as left child
@@ -198,26 +227,29 @@ class AVLTree(object):
 			if not parent.right.is_real_node():
 				parent.height += 1
 				height_changed = True
-			else:
-				self.bf_zero_cnt += 1
+			# else:
+			# 	self.bf_zero_cnt += 1
 		else:
 			parent.right = AVLNode(key, val) # "hang"    ...     right child
 			parent.right.parent = parent
+			if key > self.max_node.key:
+				self.max_node = parent.right
 			if not parent.right.is_real_node():
 				parent.height += 1
 				height_changed = True
-			else:
-				self.bf_zero_cnt += 1
+			# else:
+			# 	self.bf_zero_cnt += 1
 
-		rotation_cnt = self.rebalance_upward(parent, height_changed)
+		rotation_cnt = self.rebalance_upward(parent, height_changed, "insert")
 		
 		self._size += 1
 		return rotation_cnt # need to return number of rotations
 
-	def rebalance_upward(self, parent, height_changed):
+	def rebalance_upward(self, parent, height_changed, op):
 		rotation_cnt = 0
 		while parent != None and parent.is_real_node():
 			old_height = parent.height
+			print("rotation of " + str(parent.key))
 			self.fix_node_attr(parent)
 
 			if old_height != parent.height:
@@ -250,6 +282,9 @@ class AVLTree(object):
 						self.right_rotation(parent)
 						rotation_cnt += 2
 
+
+				if op == "insert":
+					return rotation_cnt
 				parent = parent.parent
 			height_changed = False
 		return rotation_cnt
@@ -306,9 +341,18 @@ class AVLTree(object):
 			parent.right = child
 		return parent 
 	
+	def update_max(self, key):
+		if self.max_node and key == self.max_node.key:
+			curr = self.root
+			while curr.right.is_real_node():
+				curr = curr.right
+			self.max_node = curr
+
+	
 	def delete(self, node):
 		parent = node.parent
 		rotation_cnt = 0
+		node_key = node.key
 
 		# Case 1: node deleted is a leaf
 		if not node.left.is_real_node() and not node.right.is_real_node():
@@ -331,7 +375,8 @@ class AVLTree(object):
 				parent = self.remove_leaf(successor)
 
 		# Rebalance from the parent upward
-		rotation_cnt += self.rebalance_upward(parent, True)
+		rotation_cnt += self.rebalance_upward(parent, True, "delete")
+		self.update_max(node_key)
 		self._size += -1
 		return rotation_cnt
 
@@ -376,4 +421,4 @@ class AVLTree(object):
 	@returns: the number of nodes which have balance factor equals to 0 devided by the total number of nodes
 	"""
 	def get_amir_balance_factor(self):
-		return None
+		return self.bf_zero_cnt/self._size
