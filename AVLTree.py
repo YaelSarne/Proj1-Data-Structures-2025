@@ -66,7 +66,7 @@ class AVLTree(object):
 
 			lwid = len(left[-1])
 			rwid = len(right[-1])
-			rootwid = len(root_key)
+			rootwid = len(root_key) - len(str(root.BF + 1))
 			result = [(lwid + 1) * " " + root_key + (rwid + 1) * " "]
 			
 			ls = len(left[0].rstrip())
@@ -99,17 +99,13 @@ class AVLTree(object):
 		right_h = node.right.height
 		node.height = 1 + max(left_h, right_h)
 		node.BF = left_h - right_h
-		print("key now: ", node.key)
-		print("old bf ", old_bf)
-		print("new bf ", node.BF)
-		if old_bf != node.BF and abs(old_bf) < 2 and abs(node.BF) < 2:
-			print("key changed: ", node.key)
-			
-			if old_bf == 0:
-				self.bf_zero_cnt -= 1
-			else:
-				self.bf_zero_cnt += 1
-			
+		self.update_zero_count(old_bf, node.BF)
+
+	def update_zero_count(self, old_bf, new_bf):
+		if old_bf == 0 and new_bf != 0:
+			self.bf_zero_cnt -= 1
+		elif old_bf != 0 and new_bf == 0:
+			self.bf_zero_cnt += 1
 		
 
 	def right_rotation(self, B):
@@ -214,6 +210,7 @@ class AVLTree(object):
 		# fix AVL Tree
 		height_changed = False
 
+
 		if parent == None: # was empty tree, need to update root
 			self.root = AVLNode(key, val)
 			self.max_node = self.root
@@ -240,6 +237,8 @@ class AVLTree(object):
 			# else:
 			# 	self.bf_zero_cnt += 1
 
+		self.bf_zero_cnt += 1
+
 		rotation_cnt = self.rebalance_upward(parent, height_changed, "insert")
 		
 		self._size += 1
@@ -247,9 +246,9 @@ class AVLTree(object):
 
 	def rebalance_upward(self, parent, height_changed, op):
 		rotation_cnt = 0
-		while parent != None and parent.is_real_node():
+
+		while parent != None: 
 			old_height = parent.height
-			print("rotation of " + str(parent.key))
 			self.fix_node_attr(parent)
 
 			if old_height != parent.height:
@@ -263,7 +262,7 @@ class AVLTree(object):
 			elif abs_BF == 2:
 				#GILGULIM!!!!!!
 				if parent.BF == -2:
-					if parent.right.BF == -1:
+					if parent.right.BF == -1 or (op == "delete" and parent.right.BF == 0):
 						self.left_rotation(parent)
 						rotation_cnt += 1
 
@@ -273,7 +272,7 @@ class AVLTree(object):
 						rotation_cnt += 2
 
 				elif parent.BF == 2:
-					if parent.left.BF == 1:
+					if parent.left.BF == 1 or (op == "delete" and parent.left.BF == 0):
 						self.right_rotation(parent)
 						rotation_cnt += 1
 
@@ -292,7 +291,7 @@ class AVLTree(object):
 
 	def Min(self, node):
 		"""Find Min value in sub tree of node"""
-		while node.left.is_real_node():
+		while node != None and node.left.is_real_node():
 			node = node.left
 		return node
 	
@@ -344,7 +343,7 @@ class AVLTree(object):
 	def update_max(self, key):
 		if self.max_node and key == self.max_node.key:
 			curr = self.root
-			while curr.right.is_real_node():
+			while curr != None and curr.right.is_real_node():
 				curr = curr.right
 			self.max_node = curr
 
@@ -354,6 +353,11 @@ class AVLTree(object):
 		rotation_cnt = 0
 		node_key = node.key
 
+		if node == None or node.key == None:
+			return 0
+
+		if node.BF == 0:
+			self.bf_zero_cnt -= 1
 		# Case 1: node deleted is a leaf
 		if not node.left.is_real_node() and not node.right.is_real_node():
 			parent = self.remove_leaf(node)
