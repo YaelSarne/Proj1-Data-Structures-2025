@@ -5,38 +5,69 @@ from AVLTree import AVLNode, AVLTree
 def main():
     
     tree = AVLTree()
-    tree.insert(6, "six")
-    tree.insert(8, "eight")
-    tree.insert(7, "seven")
-    tree.insert(10, "ten")
-    tree.insert(5, "five")
-    tree.insert(9, "nine")
-    tree.insert(4, "four")
-    tree.insert(11, "eleven")
-    tree.insert(3, "three")
-    tree.insert(12, "twelve")
-    tree.insert(2, "two")
-    tree.insert(1, "one")
-    print("here")
-    x = tree.search(6)
-    y = tree.successor(x)
-    print(y.key)
-    print("**********AFTER************")
-    print()
-    #tree.right_rotation(tree.root.right) #first we do a right rotation on the right son
-    #tree.left_rotation(tree.root)
-    print(tree)
-    print(tree.avl_to_array())
-    print(tree.size)
+    # tree.insert(8, "eight", "max")
+    # tree.insert(7, "seven", "max")
+    # tree.insert(10, "ten", "max")
+    # tree.insert(5, "five")
+    # # print(tree)
+    # tree.insert(9, "nine", "max")
+    # tree.insert(4, "four", "max")
+    # tree.insert(11, "eleven")
+    # tree.insert(3, "three")
+    # tree.insert(12, "twelve")
+    # x = tree.search(6)
+    # y = tree.successor(x)
+    # print(tree)
+    # print("**********AFTER************")
+    # print()
+    # print("Size ", tree.size() )
+    # print(tree.avl_to_array())
+    
 
-    print("***DELETE****")
-    print()
-    x = tree.search(7)
-    tree.delete(x)
+    # print("***DELETE****")
+    # print()
+    # x = tree.search(7)
+    # tree.delete(x)
+    # print("Size ", tree.size() )
+    # x = tree.search(9)
+    # tree.delete(x)
+    # x = tree.search(12)
+    # tree.delete(x)
+    # x = tree.search(11)
+    # tree.delete(x)
+    # print(tree)
+    # print(tree.bf_zero_cnt, " number of zero count")
+    
+
+    real_length = 0
+    for i in range(10):
+        tree.insert(i,str(i))
+        real_length += 1
+        assert(real_length == tree.size())
+    #     # "FAIL: Tree size incorrect"
+    
     print(tree)
-    x = tree.search(10)
-    tree.delete(x)
+
+    # tree.delete(tree.search(0))
+    # tree.delete(tree.search(1))
+    # print(tree)
+    # tree.delete(tree.search(2))
+    # tree.delete(tree.search(3))
+
+    
+    for i in range(9):
+        print(tree.search(i))
+        print(tree)
+        tree.delete(tree.search(i))
+        print("after delete")
+        real_length -= 1
+
+        assert(real_length == tree.size())
+        print("after assert")
+    
     print(tree)
+        #  "FAIL: Tree size incorrect"
+
 
 
     def test_insert_and_search(self):
