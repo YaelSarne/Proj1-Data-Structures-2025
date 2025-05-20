@@ -47,6 +47,7 @@ def main():
     #     # "FAIL: Tree size incorrect"
     
     print(tree)
+    print(tree.avl_to_array())
 
     # tree.delete(tree.search(0))
     # tree.delete(tree.search(1))
