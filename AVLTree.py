@@ -296,6 +296,7 @@ class AVLTree(object):
                 elif op == "delete" and not height_changed_this_level:
                     return rotation_cnt
                 
+                rotation_cnt += 1 #because height changed
                 # Continue upwards
                 current_node = current_node.parent 
             elif abs_BF == 2: # Balance Factor is problematic, needs rotation
