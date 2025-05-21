@@ -25,7 +25,7 @@ from AVLTree import AVLNode , AVLTree
 
 GRADE = 0
 MAX_GRADE = 70
-TESTS = 26
+TESTS = 16
 SCORE_PER_TEST = MAX_GRADE/TESTS
 
 class AVLTreeTester2022(unittest.TestCase):
@@ -212,10 +212,10 @@ class AVLTreeTester2022(unittest.TestCase):
 
 
     def test_non_succesful_search(self):
-        self.assertEqual(self.tree.search(0)[0], None, "FAIL - tree.search() on an empty tree should return -1")
+        self.assertEqual(self.tree.search(0), None, "FAIL - tree.search() on an empty tree should return -1")
         for i in range(10):
             self.tree.insert(i, str(i))
-        self.assertEqual(self.tree.search(11)[0], None, "FAIL - tree.search() should return None " \
+        self.assertEqual(self.tree.search(11), None, "FAIL - tree.search() should return None " \
                                                         "whenever val is not in the tree")
         self.add_points(SCORE_PER_TEST)
     
@@ -224,8 +224,8 @@ class AVLTreeTester2022(unittest.TestCase):
         for i in range(100):
             self.tree.insert(i,str(i))
         for i in range(100):
-            self.assertEqual(self.tree.search(i)[0].key,i)
-            self.assertEqual(self.tree.search(i)[0].value, str(i))
+            self.assertEqual(self.tree.search(i).key,i)
+            self.assertEqual(self.tree.search(i).value, str(i))
         self.add_points(SCORE_PER_TEST)
     
 
@@ -235,7 +235,7 @@ class AVLTreeTester2022(unittest.TestCase):
         in_order = self.in_order(T)
         lst = [str(i) for i in range(N)]
         for i in range(N):
-            lst[T.search(i)[0].key] = str(i)
+            lst[T.search(i).key] = str(i)
         self.assertEqual(in_order,lst)
         self.add_points(SCORE_PER_TEST)
 
@@ -244,9 +244,12 @@ class AVLTreeTester2022(unittest.TestCase):
         N = 100
         T = self.create_tree([i for i in range(N)], random_order=True)
         for i in range(N):
-            self.assertNotEqual(T.search(i)[0], None, "FAIL - search should return None iff str({}) is not in the tree".format(i))
-            T.delete(T.search(i)[0])
-            self.assertEqual(T.search(i)[0], None, "FAIL - search should return None iff str({}) is not in the tree".format(i))
+            node = T.search(i)
+            self.assertNotEqual(node, None, "FAIL - search should return None iff str({}) is not in the tree".format(i))
+            T.delete(node)
+            after_delete = T.search(i)
+            self.assertEqual(after_delete, None, "FAIL - search should return None iff str({}) is not in the tree".format(i))
+
         self.add_points(SCORE_PER_TEST)
 
 
@@ -257,8 +260,8 @@ class AVLTreeTester2022(unittest.TestCase):
 
         # Check get_key and get_value
         for i in node_list:
-            self.assertEqual(i , avl_tree.search(i)[0].key, "FAIL - get key")
-            self.assertEqual(str(i), avl_tree.search(i)[0].value, "FAIL - get value")
+            self.assertEqual(i , avl_tree.search(i).key, "FAIL - get key")
+            self.assertEqual(str(i), avl_tree.search(i).value, "FAIL - get value")
         self.add_points(SCORE_PER_TEST)
 
         # Check root properties
@@ -298,8 +301,8 @@ class AVLTreeTester2022(unittest.TestCase):
 
 
         # Check virtual node properties
-        childless_nodes = [avl_tree.search(11)[0], avl_tree.search(31)[0], avl_tree.search(50)[0], avl_tree.search(72)[0],
-                           avl_tree.search(99)[0]]
+        childless_nodes = [avl_tree.search(11), avl_tree.search(31), avl_tree.search(50), avl_tree.search(72),
+                           avl_tree.search(99)]
         for node in childless_nodes:
             self.assertFalse(node.right.is_real_node() , "FAIL - is_real_node returns true for virtual node")
             self.assertFalse(node.left.is_real_node() , "FAIL - is_real_node returns true for virtual node")

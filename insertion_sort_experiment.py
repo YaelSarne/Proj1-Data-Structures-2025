@@ -141,7 +141,7 @@ def run_experiment(tree_type, insertion_method, input_type, data_sizes):
 # --- Main Execution ---
 
 if __name__ == "__main__":
-    data_sizes = [500, 1000, 2000, 5000, 8000, 10000, 15000, 20000, 50000, 100000, 150000] # Adjust as needed
+    data_sizes = [50, 100, 200, 400,600,800,1100, 1400,1800,2000, 2400, 3000, 5000, 6000] # Adjust as needed
 
     results_sorted = {}
     results_reversed = {}
@@ -176,7 +176,7 @@ if __name__ == "__main__":
     plt.legend(fontsize=10)
     plt.grid(True)
     plt.tight_layout()
-    plt.savefig('sorted_input_runtime3.png') # Save the plot instead of showing
+    plt.savefig('sorted_input_runtime6.png') # Save the plot instead of showing
     plt.close() # Close the plot to free memory
 
     # Plot for Reversed Input
@@ -191,7 +191,7 @@ if __name__ == "__main__":
     plt.legend(fontsize=10)
     plt.grid(True)
     plt.tight_layout()
-    plt.savefig('reversed_input_runtime3.png') # Save the plot instead of showing
+    plt.savefig('reversed_input_runtime6.png') # Save the plot instead of showing
     plt.close() # Close the plot to free memory
 
     print("\nExperiments completed. Plots saved as 'sorted_input_runtime.png' and 'reversed_input_runtime.png'.")
