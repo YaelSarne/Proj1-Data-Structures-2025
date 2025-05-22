@@ -17,17 +17,14 @@ class AVLNode(object):
         self.key = key
         self.value = value
         self.parent = None
-        self.height = -1 if key is None else 0 # Height of a virtual node is -1, real node 0
-        self.BF = 0 # Balance Factor for a newly created real node (leaf) is 0
-
-        # If it's a real node, its children are initially virtual nodes.
-        # If it's a virtual node (key is None), its children are None.
+        self.height = -1 if key is None else 0 
+        self.BF = 0
         if key is not None:
             self.left = AVLNode() # Virtual child
             self.right = AVLNode() # Virtual child
         else:
-            self.left = None # Virtual node has no children
-            self.right = None # Virtual node has no children
+            self.left = None 
+            self.right = None 
 
     def __repr__(self):
         # A more robust __repr__ for debugging that handles virtual nodes nicely
@@ -54,9 +51,9 @@ class AVLTree(object):
     """
     def __init__(self):
         self.root = None
-        self.max_node = None # Stores the node with the maximum key
+        self.max_node = None 
         self._size = 0 
-        self.bf_zero_cnt = 0 # Counter for nodes with BF = 0
+        self.bf_zero_cnt = 0 
 
     def __repr__(self):  # you don't need to understand the implementation of this method
         def printree(root):
@@ -99,13 +96,10 @@ class AVLTree(object):
 
     def fix_node_attr(self, node): 
         """Fix node height + BF. Assumes node is a real node."""
-        if not node or not node.is_real_node(): # Should not happen if called correctly
+        if not node or not node.is_real_node():
             return
         
-        old_bf = node.BF # Store old BF to update bf_zero_cnt
-        
-        # Get height of children. Virtual nodes have height -1.
-        # Ensure we check if child is not None before accessing attributes
+        old_bf = node.BF 
         left_h = node.left.height if node.left is not None and node.left.is_real_node() else -1
         right_h = node.right.height if node.right is not None and node.right.is_real_node() else -1
         
@@ -126,14 +120,12 @@ class AVLTree(object):
     def right_rotation(self, B):
         A = B.left
         B.left = A.right
-        # Update parent for A's old right child if it's real and not None
         if B.left is not None and B.left.is_real_node():
             B.left.parent = B
         
         A.right = B
-        A.parent = B.parent # A takes B's parent
+        A.parent = B.parent
         
-        # Update parent's child pointer
         if A.parent is None:
             self.root = A
         elif B.parent.right == B: # B was right child
@@ -142,23 +134,20 @@ class AVLTree(object):
             A.parent.left = A
         B.parent = A # B's new parent is A
 
-        # Fix attributes bottom-up (B then A)
         self.fix_node_attr(B)
         self.fix_node_attr(A)
-        return A # Return the new root of the rotated subtree
+        return A 
 
 
     def left_rotation(self, B):
         A = B.right
         B.right = A.left
-        # Update parent for A's old left child if it's real and not None
         if B.right is not None and B.right.is_real_node():
             B.right.parent = B
         
         A.left = B
-        A.parent = B.parent # A takes B's parent
+        A.parent = B.parent 
 
-        # Update parent's child pointer
         if A.parent is None:
             self.root = A
         elif B.parent.right == B: # B was right child
@@ -167,10 +156,9 @@ class AVLTree(object):
             A.parent.left = A
         B.parent = A # B's new parent is A
         
-        # Fix attributes bottom-up (B then A)
         self.fix_node_attr(B)
         self.fix_node_attr(A)
-        return A # Return the new root of the rotated subtree
+        return A 
 
 
     """searches for a node in the dictionary corresponding to the key
@@ -207,54 +195,51 @@ class AVLTree(object):
         if key is None:
             return 0
         
-        # Handle empty tree case
         if self.root is None:
             self.root = AVLNode(key, val)
-            self.max_node = self.root # Max node is also the root for a single-node tree
+            self.max_node = self.root 
             self._size = 1
-            self.bf_zero_cnt = 1 # A single node (leaf) has BF = 0
+            self.bf_zero_cnt = 1 
             return 0
 
         parent = None
         current = None
 
-        if start == "max" and self.max_node and key > self.max_node.key:
-            # Optimization: If inserting a key larger than max_node, directly go to max_node's right
-            parent = self.max_node
-            current = self.max_node.right # This will be a virtual node
-        elif start == "root" or not self.max_node:
-            # Standard traversal from root (or if max_node is not reliable/set)
+        if start == "root":
             current = self.root
-            # Descend to find insertion point
-            while current is not None and current.is_real_node():
-                parent = current
-                if key == current.key: # Key already exists, update value and return 0 rotations
-                    current.value = val
-                    return 0
-                elif key < current.key:
-                    current = current.left
-                else:
-                    current = current.right
-        else: # start == "max" but key is not strictly greater than max_node.key, fall back to root search
-            return self.insert(key, val, start="root")
-        
+        elif start == "max":
+            current = self.max_node
+            while current and current.is_real_node() and key <= current.key:
+                current = current.parent
+            if current is None:
+                return self.insert(key, val, start="root")
+
+        while current is not None and current.is_real_node():
+            parent = current
+            if key == current.key:
+                current.value = val
+                return 0
+            elif key < current.key:
+                current = current.left
+            else:
+                current = current.right
+
         # Create the new node
         new_node = AVLNode(key, val)
         new_node.parent = parent
 
-        # Link new node to its parent
-        if parent is None: # This case should be handled by the initial empty tree check
-            self.root = new_node # Safety fallback
+        if parent is None: 
+            self.root = new_node 
         elif key < parent.key:
             parent.left = new_node
         else: # key > parent.key
             parent.right = new_node
-            # Update max_node if the new node is the largest
-            if self.max_node is None or key > self.max_node.key: # Ensure max_node is updated correctly
-                self.max_node = new_node
+        
+        if self.max_node is None or key > self.max_node.key: 
+            self.max_node = new_node
         
         self._size += 1
-        self.bf_zero_cnt += 1 # New leaf node has BF 0
+        self.bf_zero_cnt += 1 #
         
         # Start rebalancing from the parent of the newly inserted node
         rotation_cnt = self.rebalance_upward(new_node.parent, "insert")
@@ -278,58 +263,48 @@ class AVLTree(object):
 
         while current_node is not None and current_node.is_real_node():
             old_height = current_node.height
-            old_bf = current_node.BF # Store old BF for update_zero_count
+            old_bf = current_node.BF
 
-            # Update height and BF of current_node based on its children's *current* states
             self.fix_node_attr(current_node)
 
-            # Determine if height changed at THIS level
             height_changed_this_level = (old_height != current_node.height)
 
             abs_BF = abs(current_node.BF)
-            if abs_BF < 2: # Balance Factor is within AVL limits (-1, 0, 1)
+            if abs_BF < 2: 
                 if op == "insert" and not height_changed_this_level:
-                    # For insertion, if BF is fine and height didn't change, we're done.
                     return rotation_cnt
-                # For deletion, if BF is fine but height didn't change, we're done (no more propagation needed).
-                # If height did change (e.g., a branch shrunk), we need to continue upwards.
                 elif op == "delete" and not height_changed_this_level:
                     return rotation_cnt
                 
-                rotation_cnt += 1 #because height changed
-                # Continue upwards
+                rotation_cnt += 1 
                 current_node = current_node.parent 
-            elif abs_BF == 2: # Balance Factor is problematic, needs rotation
+            elif abs_BF == 2: 
                 # Perform rotations
-                if current_node.BF == -2: # Right heavy
+                if current_node.BF == -2: 
                     if current_node.right.BF == -1 or (op == "delete" and current_node.right.BF == 0):
                         rotated_node = self.left_rotation(current_node)
                         rotation_cnt += 1
-                    elif current_node.right.BF == 1: # LR Rotation
-                        self.right_rotation(current_node.right) # First rotation
-                        rotated_node = self.left_rotation(current_node) # Second rotation
+                    elif current_node.right.BF == 1: 
+                        self.right_rotation(current_node.right) 
+                        rotated_node = self.left_rotation(current_node)
                         rotation_cnt += 2
-                    else: # This case should ideally not happen if BF is maintained correctly
-                        return rotation_cnt # Safety break
-                elif current_node.BF == 2: # Left heavy
+                    else: 
+                        return rotation_cnt 
+                    
+                elif current_node.BF == 2: 
                     if current_node.left.BF == 1 or (op == "delete" and current_node.left.BF == 0):
                         rotated_node = self.right_rotation(current_node)
                         rotation_cnt += 1
-                    elif current_node.left.BF == -1: # RL Rotation
-                        self.left_rotation(current_node.left) # First rotation
-                        rotated_node = self.right_rotation(current_node) # Second rotation
+                    elif current_node.left.BF == -1: 
+                        self.left_rotation(current_node.left) 
+                        rotated_node = self.right_rotation(current_node) 
                         rotation_cnt += 2
-                    else: # This case should ideally not happen if BF is maintained correctly
-                        return rotation_cnt # Safety break
+                    else: 
+                        return rotation_cnt 
                 
-                # After rotation, if it's an insertion, we are done.
                 if op == "insert":
                     return rotation_cnt
                 
-                # For deletion, rotations might reduce the height of the subtree.
-                # We need to continue upwards to propagate height changes.
-                # The 'rotated_node' is the new root of the just-balanced subtree.
-                # We need to continue rebalancing from its parent.
                 current_node = rotated_node.parent 
             
         return rotation_cnt
@@ -337,7 +312,7 @@ class AVLTree(object):
 
     def Min(self, node):
         """Find Min value in sub tree of node"""
-        if not node or not node.is_real_node(): # Handle virtual nodes/None input
+        if not node or not node.is_real_node(): 
             return None
         while node.left is not None and node.left.is_real_node():
             node = node.left
@@ -348,11 +323,9 @@ class AVLTree(object):
         if not node or not node.is_real_node():
             return None
         
-        # If node has a right child, successor is the minimum in right subtree
         if node.right is not None and node.right.is_real_node():
             return self.Min(node.right)
         
-        # Otherwise, successor is the lowest ancestor y of x such that x is in y's left subtree
         y = node.parent
         while (y is not None and y.is_real_node()) and (node == y.right):
             node = y
@@ -370,12 +343,11 @@ class AVLTree(object):
     def remove_leaf(self, node):
         # Case 1: node deleted is a leaf - Simply delete
         parent = node.parent
-        if parent is None: # node is root and the only node
+        if parent is None: 
             self.root = None
         elif parent.left == node:
             parent.left = AVLNode() # Replace with a virtual node
-            # Virtual nodes do NOT have a parent attribute pointing back to their "parent"
-        else: # parent.right == node
+        else:
             parent.right = AVLNode() # Replace with a virtual node
         return parent # Return parent for rebalancing starting point
 
@@ -383,7 +355,6 @@ class AVLTree(object):
     def remove_single_child(self, node):
         # Case 2: node deleted has only 1 real child
         parent = node.parent
-        # Determine the real child (which must be real as per case description)
         child = node.left if node.left is not None and node.left.is_real_node() else node.right
         
         # Connect child to grandparent (parent of node)
@@ -392,20 +363,18 @@ class AVLTree(object):
         
         if parent is None: # If node was the root
             self.root = child
-        elif parent.left == node: # If node was left child of parent
+        elif parent.left == node: 
             parent.left = child
-        else: # If node was right child of parent
+        else: 
             parent.right = child
-        return parent # Return parent for rebalancing starting point
+        return parent 
 
 
     def update_max(self, key_of_deleted_node):
-        # If the tree becomes empty after deletion
         if self.root is None:
             self.max_node = None
             return
 
-        # If the deleted node was the max_node, we need to find the new max_node
         if self.max_node and key_of_deleted_node == self.max_node.key:
             curr = self.root
             while curr is not None and curr.right is not None and curr.right.is_real_node():
@@ -414,17 +383,15 @@ class AVLTree(object):
 
 
     def delete(self, node):
-        if not node or not node.is_real_node(): # Input validation
-            return 0 # Nothing to delete if node is None or virtual
+        if not node or not node.is_real_node(): 
+            return 0
 
-        parent_for_rebalance = None # This will be the node from which rebalancing starts
-        node_key_deleted = node.key # Store the key before it potentially changes (if swapped with successor)
+        parent_for_rebalance = None 
+        node_key_deleted = node.key 
 
-        # Decrement bf_zero_cnt if the node being *conceptually* deleted (or its successor) had BF=0
-        if node.BF == 0: # This is the node that will be removed from its position
+        if node.BF == 0: 
             self.bf_zero_cnt -= 1
         
-        # Determine which removal case
         if not node.left.is_real_node() and not node.right.is_real_node():
             # Case 1: node to delete is a leaf (has two virtual children)
             parent_for_rebalance = self.remove_leaf(node)
@@ -434,24 +401,19 @@ class AVLTree(object):
         else: # Node has two real children - Case 3: replace with successor
             successor = self.successor(node)
             
-            # If successor had BF=0 at its original position, decrement count.
             if successor.BF == 0:
                 self.bf_zero_cnt -= 1 
 
-            # Swap key and value from successor to the node being conceptually deleted
             node.key, node.value = successor.key, successor.value
             
-            # Now, physically delete the successor (which is either a leaf or has only a right child)
-            # The parent_for_rebalance is the parent of the *physically removed* node (the successor's old parent).
             if successor.right is not None and successor.right.is_real_node():
                 parent_for_rebalance = self.remove_single_child(successor)
             else:
                 parent_for_rebalance = self.remove_leaf(successor)
 
-        self._size -= 1 # Decrement size after successful deletion
-        self.update_max(node_key_deleted) # Update max_node only after size is decremented
+        self._size -= 1 
+        self.update_max(node_key_deleted) 
 
-        # Rebalance upwards from the determined parent
         rotation_cnt = self.rebalance_upward(parent_for_rebalance, "delete")
         
         return rotation_cnt
