@@ -2,7 +2,7 @@ import time
 import matplotlib.pyplot as plt
 import random
 from AVLTree import AVLTree  # Import the AVLTree class from avl_tree.py
-import math
+
 
 # --- Binary Search Tree (BST) Implementation ---
 
@@ -138,25 +138,10 @@ def run_experiment(tree_type, insertion_method, input_type, data_sizes):
         times.append(end_time - start_time)
     return times
 
-# --- Theoretical Complexity Functions ---
-# Removed arbitrary scaling factors to show the true shape of the functions.
-# Note: The absolute values of these theoretical functions might be very different
-# from the experimental times, as Big O notation describes growth rate, not absolute time.
-
-def n_log_n_func(n_values):
-    return [n * math.log(n) if n > 0 else 0 for n in n_values]
-
-def n_func(n_values):
-    return [n for n in n_values]
-
-def n_squared_func(n_values):
-    return [n**2 for n in n_values]
-
-
 # --- Main Execution ---
 
 if __name__ == "__main__":
-    data_sizes = [50, 100, 200, 400,600,800,1100, 1400,1800,2000] # Adjust as needed
+    data_sizes = [200, 400, 600, 800, 1000, 1400, 1600, 1800, 2000, 2400] # Adjust as needed
 
     results_sorted = {}
     results_reversed = {}
@@ -175,55 +160,38 @@ if __name__ == "__main__":
     results_reversed["AVL_root"] = run_experiment("AVL", "root", "reversed", data_sizes)
     results_reversed["AVL_max"] = run_experiment("AVL", "max", "reversed", data_sizes)
 
-    # Calculate theoretical complexities
-    n_log_n_times = n_log_n_func(data_sizes)
-    n_times = n_func(data_sizes)
-    n_squared_times = n_squared_func(data_sizes)
-
+    # --- Plotting Results ---
 
     # --- Plotting Results ---
 
     # Plot for Sorted Input
-    plt.figure(figsize=(12, 8)) # Increased figure size
-    plt.plot(data_sizes, results_sorted["BST_root"], label="BST - Insertion from Root (Experimental)", marker='o', linestyle='-')
-    plt.plot(data_sizes, results_sorted["BST_max"], label="BST - Insertion from Max (Experimental)", marker='x', linestyle='--')
-    plt.plot(data_sizes, results_sorted["AVL_root"], label="AVL - Insertion from Root (Experimental)", marker='s', linestyle='-.')
-    plt.plot(data_sizes, results_sorted["AVL_max"], label="AVL - Insertion from Max (Experimental)", marker='d', linestyle=':')
-
-    # Add theoretical complexity lines
-    plt.plot(data_sizes, n_log_n_times, label="$N \log N$", color='purple', linestyle='-', linewidth=2)
-    plt.plot(data_sizes, n_times, label="$N$", color='green', linestyle='-', linewidth=2)
-    plt.plot(data_sizes, n_squared_times, label="$N^2$", color='red', linestyle='-', linewidth=2)
-
-
-    plt.xlabel("Input Size (N)", fontsize=12)
+    plt.figure(figsize=(10, 6))
+    plt.plot(data_sizes, results_sorted["BST_root"], label="BST - Insertion from Root", marker='o')
+    plt.plot(data_sizes, results_sorted["BST_max"], label="BST - Insertion from Max", marker='x')
+    plt.plot(data_sizes, results_sorted["AVL_root"], label="AVL - Insertion from Root", marker='s')
+    plt.plot(data_sizes, results_sorted["AVL_max"], label="AVL - Insertion from Max", marker='d')
+    plt.xlabel("Input Size", fontsize=12)
     plt.ylabel("Execution Time (seconds)", fontsize=12)
-    plt.title("Tree Insertion Runtime: Sorted Input", fontsize=14)
-    plt.legend(fontsize=10, loc='upper left') # Adjusted legend location
+    plt.title("Insertion Sort Runtime: Sorted Input", fontsize=14)
+    plt.legend(fontsize=10)
     plt.grid(True)
     plt.tight_layout()
-    plt.savefig('sorted_input_runtime_with_theoretical.png') # New filename
+    plt.savefig('insertion-pics/sorted_input_runtime3.png') # Save the plot instead of showing
     plt.close() # Close the plot to free memory
 
     # Plot for Reversed Input
-    plt.figure(figsize=(12, 8)) # Increased figure size
-    plt.plot(data_sizes, results_reversed["BST_root"], label="BST - Insertion from Root (Experimental)", marker='o', linestyle='-')
-    plt.plot(data_sizes, results_reversed["BST_max"], label="BST - Insertion from Max (Experimental)", marker='x', linestyle='--')
-    plt.plot(data_sizes, results_reversed["AVL_root"], label="AVL - Insertion from Root (Experimental)", marker='s', linestyle='-.')
-    plt.plot(data_sizes, results_reversed["AVL_max"], label="AVL - Insertion from Max (Experimental)", marker='d', linestyle=':')
-
-    # Add theoretical complexity lines
-    plt.plot(data_sizes, n_log_n_times, label="$N \log N$", color='purple', linestyle='-', linewidth=2)
-    plt.plot(data_sizes, n_times, label="$N$", color='green', linestyle='-', linewidth=2)
-    plt.plot(data_sizes, n_squared_times, label="$N^2$", color='red', linestyle='-', linewidth=2)
-
-    plt.xlabel("Input Size (N)", fontsize=12)
+    plt.figure(figsize=(10, 6))
+    plt.plot(data_sizes, results_reversed["BST_root"], label="BST - Insertion from Root", marker='o')
+    plt.plot(data_sizes, results_reversed["BST_max"], label="BST - Insertion from Max", marker='x')
+    plt.plot(data_sizes, results_reversed["AVL_root"], label="AVL - Insertion from Root", marker='s')
+    plt.plot(data_sizes, results_reversed["AVL_max"], label="AVL - Insertion from Max", marker='d')
+    plt.xlabel("Input Size", fontsize=12)
     plt.ylabel("Execution Time (seconds)", fontsize=12)
-    plt.title("Tree Insertion Runtime: Reversed Input", fontsize=14)
-    plt.legend(fontsize=10, loc='upper left') # Adjusted legend location
+    plt.title("Insertion Sort Runtime: Reversed Input", fontsize=14)
+    plt.legend(fontsize=10)
     plt.grid(True)
     plt.tight_layout()
-    plt.savefig('reversed_input_runtime_with_theoretical.png') # New filename
+    plt.savefig('insertion-pics/reversed_input_runtime3.png') # Save the plot instead of showing
     plt.close() # Close the plot to free memory
 
-    print("\nExperiments completed. Plots saved as 'sorted_input_runtime_with_theoretical.png' and 'reversed_input_runtime_with_theoretical.png'.")
+    print("\nExperiments completed. Plots saved as 'sorted_input_runtime.png' and 'reversed_input_runtime.png'.")
