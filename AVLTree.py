@@ -1,8 +1,8 @@
 #username - complete info
 #id1      - complete info 
 #name1    - complete info 
-#id2      - complete info
-#name2    - complete info  
+#id2      - 325162782
+#name2    - Yael Sarne 
 
 """A class represnting a node in an AVL tree"""
 class AVLNode(object):
