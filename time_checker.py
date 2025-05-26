@@ -1,125 +1,98 @@
 import time
+import math                                   # <<< CHANGED >>>
 import random
 import matplotlib.pyplot as plt
-import os
-from AVLTree import AVLTree  # <-- IMPORTANT: Uncomment this line and ensure AVLTree.py is accessible
+from AVLTree import AVLTree                   # Make sure AVLTree.py is import-able
 
+
+# ---------------------------------------------------------------------------
+# Permutation generator  – unchanged
+# ---------------------------------------------------------------------------
 def generate_permutation_with_inversions(n, k):
-    """
-    Generates a permutation of numbers from 0 to n-1 with exactly k inversions.
-    This function can be computationally intensive for very large n and k.
-    """
     result = []
     available = list(range(n))
-    for i in range(n):
-        # Determine the position to pop from 'available' to create 'pos' inversions.
-        # 'pos' is capped at len(available) - 1 to prevent index out of bounds.
+    for _ in range(n):
         pos = min(k, len(available) - 1)
         result.append(available.pop(pos))
         k -= pos
     return result
 
-def benchmark_avl_inserts(n, step):
+
+# ---------------------------------------------------------------------------
+# Benchmark
+# ---------------------------------------------------------------------------
+def benchmark_avl_inserts(n, step, repeats=3):           # <<< CHANGED >>>
     """
-    Benchmarks AVL tree insertion time for varying numbers of inversions.
-
-    Args:
-        n (int): The number of elements to insert into the AVL tree.
-        step (int): The step size for iterating through the number of inversions.
-
-    Returns:
-        tuple: Two lists, (inversions_list, durations_list), containing the
-               number of inversions and corresponding execution times in microseconds.
+    Run `repeats` independent measurements for every inversion count and
+    return both the raw average time and a time normalised by log₂(n).
     """
-    max_inversions = n * (n - 1) // 2
-    
-    inversions_list = []
-    durations_list = []
+    max_inv = n * (n - 1) // 2
+    inv_list, raw_us, norm_us = [], [], []
 
-    print(f"--- Starting AVL Insertion Benchmark (N={n}) ---")
-    print(f"{'Inversions':<15} {'Time (microseconds)':<25}")
-    print(f"{'-'*15} {'-'*25}")
+    print(f"--- AVL insertion benchmark (N={n}, repeats={repeats}) ---")
+    print(f"{'inversions':>12}   {'avg µs':>12}   {'µs / log₂(n)':>14}")
+    print("-" * 44)
 
-    for inversions in range(0, max_inversions + 1, step):
-        # Ensure we don't exceed max_inversions due to step size
-        current_inversions = min(inversions, max_inversions)
+    for inv in range(0, max_inv + 1, step):
+        k = min(inv, max_inv)
+        keys = generate_permutation_with_inversions(n, k)
 
-        # Generate the keys with the specified number of inversions
-        # Note: generate_permutation_with_inversions can be slow for very large N.
-        keys = generate_permutation_with_inversions(n, current_inversions)
-        
-        tree = AVLTree() # Create a new AVL tree for each benchmark run
+        run_times = []
+        for _ in range(repeats):
+            tree = AVLTree()
+            t0 = time.perf_counter()
+            for key in keys:
+                tree.insert(key, "v", "max")
+            run_times.append((time.perf_counter() - t0) * 1e6)  # µs
 
-        start = time.perf_counter()
-        for key in keys:
-            # The 'max' argument is passed but might not be used by your AVLTree implementation
-            # if it's a standard insertion.
-            tree.insert(key, "value", "max") 
-        end = time.perf_counter()
+        avg = sum(run_times) / repeats
+        inv_list.append(k)
+        raw_us.append(avg)
+        norm_us.append(avg / math.log2(n))                    # <<< CHANGED >>>
 
-        duration = (end - start) * 1e6  # Convert to microseconds
-        
-        # Store results
-        inversions_list.append(current_inversions)
-        durations_list.append(duration)
-        
-        # Print to console for real-time feedback
-        print(f"{current_inversions:<15} {duration:<25.2f}")
+        print(f"{k:12d}   {avg:12.0f}   {norm_us[-1]:14.0f}")
 
-        if current_inversions == max_inversions: # Stop if we hit max_inversions exactly
+        if k >= max_inv:
             break
 
-    print(f"\nBenchmark complete for N={n}.")
-    return inversions_list, durations_list
-
-def plot_results(inversions_data, durations_data, n_value, output_plot_filename="avl_inversions_plot.png"):
-    """
-    Plots the benchmark results using matplotlib and saves the plot to a file.
-
-    Args:
-        inversions_data (list): List of inversion counts.
-        durations_data (list): List of corresponding execution times.
-        n_value (int): The N value used for the benchmark.
-        output_plot_filename (str): The name of the image file to save the plot.
-    """
-    plt.figure(figsize=(10, 6)) # Set figure size
-    plt.plot(inversions_data, durations_data, marker='o', linestyle='-', color='skyblue', label=f'AVL Insertion (N={n_value})')
-
-    plt.title(f'AVL Insertion Runtime vs. Inversions (N={n_value})', fontsize=16)
-    plt.xlabel('Number of Inversions', fontsize=14)
-    plt.ylabel('Execution Time (microseconds)', fontsize=14)
-    plt.grid(True, linestyle='--', alpha=0.7) # Add grid for readability
-    plt.legend(fontsize=12)
-    plt.tight_layout() # Adjust layout to prevent labels from overlapping
-
-    # Save the plot
-    plt.savefig(output_plot_filename)
-    print(f"Graph saved to '{output_plot_filename}'")
-    plt.show() # Display the plot (optional, can be removed if only saving)
+    return inv_list, raw_us, norm_us
 
 
+# ---------------------------------------------------------------------------
+# Plotting
+# ---------------------------------------------------------------------------
+import numpy as np  # חשוב לייבא את זה למטה או למעלה
+
+def plot_results(inversions, raw, norm, n_value,
+                 outfile="avl_inversions_plot.png"):
+    plt.figure(figsize=(10, 6))
+
+    # Plot only the average raw times
+    plt.plot(inversions, raw, marker='o', linestyle='-', color='skyblue', label="avg µs")
+
+    # הוספת קו מקוקו לפי הפונקציה n * log2(I/n + 2)
+    inv_array = np.array(inversions)
+    curve = n_value * np.log2(inv_array / n_value + 2)
+    plt.plot(inv_array, curve, linestyle='--', color='red', label=r"$n \cdot \log_2(\frac{I}{n} + 2)$")
+
+    plt.title(f"AVL insertion vs. inversions (N={n_value})")
+    plt.xlabel("Number of Inversions")
+    plt.ylabel("Execution Time (µs)")
+    plt.grid(True, linestyle="--", alpha=0.6)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(outfile, dpi=150)
+    print(f"Graph saved to '{outfile}'")
+    plt.show()
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    # --- Configuration for the benchmark ---
-    # N: The number of elements to insert.
-    # Be cautious with very large N, as generate_permutation_with_inversions can be slow
-    # and the benchmark itself will take longer.
-    # For a quick test, start with N=1000 or N=5000.
-    # For more meaningful results, you might need N=100000 or more, but it will take significant time.
-    test_n = 100000 # Example: 2000 elements
+    test_n      = 200_000                       # same N
+    test_step   = 1_000_000                 # same step
+    repeats     = 1                       # <<< CHANGED >>>
+    plot_file   = "avl_inversions_runtime_graph3.png"
 
-    # Step: How many inversions to increment by between data points.
-    # max_inversions = n * (n - 1) // 2.
-    # For N=2000, max_inversions is 2000 * 1999 / 2 = 1,999,000.
-    # A step of 100000 would give about 20 data points.
-    test_step = 500000000 # Example: Check every 100,000 inversions
-
-    # Output filename for the plot
-    plot_filename = "avl_inversions_runtime_graph.png"
-
-    # Run the benchmark and get the data
-    inversions, durations = benchmark_avl_inserts(n=test_n, step=test_step)
-
-    # Plot the results
-    plot_results(inversions, durations, n_value=test_n, output_plot_filename=plot_filename)
-
-    print("\nScript finished.")
+    inv, raw, norm = benchmark_avl_inserts(test_n, test_step, repeats)
+    plot_results(inv, raw, norm, n_value=test_n, outfile=plot_file)
